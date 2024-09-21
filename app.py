@@ -1,65 +1,68 @@
 from flask import Flask, send_file
-import matplotlib.pyplot as plt
+from PIL import Image, ImageDraw
 import numpy as np
-import matplotlib.patches as patches
+import os
 
 app = Flask(__name__)
 
-def draw_flower():
-    # Crear una figura y un eje
-    fig, ax = plt.subplots(figsize=(6, 8))
+def crear_ramo_flores(cantidad_flores=55):
+    # Crear una imagen con fondo rosa pálido
+    ancho, alto = 800, 800
+    imagen = Image.new('RGB', (ancho, alto), (255, 192, 203))  # Fondo rosa pálido
+    dibujar = ImageDraw.Draw(imagen)
 
-    # Fondo negro
-    ax.set_facecolor('black')
+    # Colores
+    color_lirio = (255, 255, 102)  # Amarillo suave
+    color_borde = (255, 140, 0)     # Naranja claro
+    color_tallo = (34, 139, 34)     # Verde
+    color_hoja = (0, 128, 0)        # Verde oscuro
 
-    # Función para dibujar una flor
-    def draw_single_flower(center_x, center_y, petal_color, center_color):
-        # Tallo
-        ax.plot([center_x, center_x], [center_y - 1, center_y], color='#00FF00', lw=3)
+    # Espaciado y ángulo para la distribución espiral
+    angulo = np.linspace(0, 6 * np.pi, cantidad_flores)
+    radio = np.linspace(50, 250, cantidad_flores)
 
-        # Pétalos en círculo
-        for angle in np.linspace(0, 2 * np.pi, 6, endpoint=False):
-            petal = patches.Ellipse((center_x + 0.3 * np.cos(angle), center_y + 0.3 * np.sin(angle)),
-                                    width=0.6, height=1.0, angle=np.degrees(angle),
-                                    color=petal_color, ec='none')
-            ax.add_patch(petal)
+    # Dibujar las flores
+    for i in range(cantidad_flores):
+        # Calcular la posición de cada flor
+        x = 400 + radio[i] * np.cos(angulo[i])
+        y = 400 + radio[i] * np.sin(angulo[i])
 
-        # Centro de la flor
-        center = patches.Circle((center_x, center_y), radius=0.15, color=center_color)
-        ax.add_patch(center)
+        # Dibujar pétalos con diferentes formas
+        for angle in range(0, 360, 30):
+            petalo_x = x + 40 * np.cos(np.radians(angle))
+            petalo_y = y + 40 * np.sin(np.radians(angle))
 
-    # Dibujar las tres flores
-    draw_single_flower(0, 1.5, '#FFFF00', 'white')   # Flor central
-    draw_single_flower(-1.5, 0.5, '#FFFF00', 'white')  # Flor izquierda
-    draw_single_flower(1.5, 0.5, '#FFFF00', 'white')   # Flor derecha
+            petalo_ancho = 20 + np.random.randint(-5, 5)
+            petalo_largo = 40 + np.random.randint(-5, 5)
 
-    # Hojas en el tallo (lado izquierdo)
-    leaf1 = patches.Ellipse((-0.4, 0.5), width=0.8, height=0.3, angle=30, color='#00FF80', ec='none')
-    ax.add_patch(leaf1)
+            dibujar.ellipse([petalo_x - petalo_ancho, petalo_y - petalo_largo, petalo_x + petalo_ancho, petalo_y + 5], fill=color_lirio)
+            dibujar.ellipse([petalo_x - petalo_ancho - 2, petalo_y - petalo_largo - 2, petalo_x + petalo_ancho + 2, petalo_y + 7], outline=color_borde, width=2)
 
-    # Hojas en el tallo (lado derecho)
-    leaf2 = patches.Ellipse((0.4, 0.6), width=0.8, height=0.3, angle=-30, color='#00FF80', ec='none')
-    ax.add_patch(leaf2)
+        # Solo algunos tallos
+        if i % 2 == 0:  # Cada segunda flor tendrá tallo
+            dibujar.line([x, y + 5, 400, 700], fill=color_tallo, width=8)
 
-    # Añadir partículas brillantes
-    np.random.seed(42)  # Para consistencia en las posiciones
-    stars_x = np.random.uniform(-2, 2, 40)
-    stars_y = np.random.uniform(-1, 2.5, 40)
-    ax.scatter(stars_x, stars_y, color='white', s=10)
+        # Dibujar el centro de la flor
+        centro_color = (255, 204, 0)
+        dibujar.ellipse([x - 15, y - 15, x + 15, y + 15], fill=centro_color)
 
-    # Configuración de los límites y aspecto
-    ax.set_xlim([-2, 2])
-    ax.set_ylim([-1, 3])
-    ax.axis('off')
+        # Dibujar hojas
+        hoja_ancho = 30
+        hoja_largo = 50
+        hoja_offset = np.random.randint(-10, 10)
+        dibujar.polygon([(x - 25, y + 5), (x - hoja_ancho + hoja_offset, y + hoja_largo), (x, y + 10)], fill=color_hoja)  # Hoja izquierda
+        dibujar.polygon([(x + 25, y + 5), (x + hoja_ancho + hoja_offset, y + hoja_largo), (x, y + 10)], fill=color_hoja)  # Hoja derecha
 
-    # Guardar la imagen
-    plt.savefig('/tmp/flower_image.png', bbox_inches='tight', facecolor='black')
-    plt.close(fig)
+    # Guardar la imagen en formato PNG
+    imagen.save('ramo_flores.png')
+    return 'ramo_flores.png'
 
 @app.route('/')
-def home():
-    draw_flower()
-    return send_file('/tmp/flower_image.png', mimetype='image/png')
+def mostrar_imagen():
+    nombre_archivo = crear_ramo_flores(45)
+    response = send_file(nombre_archivo, mimetype='image/png')
+    os.remove(nombre_archivo)
+    return response
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=False, host="0.0.0.0")
