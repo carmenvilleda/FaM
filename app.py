@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.patches as patches
 
-app = Flask(_name_)
+app = Flask(__name__)
 
 def draw_flower():
     # Crear una figura y un eje
@@ -61,5 +61,5 @@ def home():
     draw_flower()
     return send_file('/tmp/flower_image.png', mimetype='image/png')
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
