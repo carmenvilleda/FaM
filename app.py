@@ -37,11 +37,6 @@ def mostrar_imagen():
     return send_file(nombre_archivo, mimetype='image/png')
 
 
-#192.168.0.1
-
-#if __name__ == '__main__':
- #   app.run(debug=True, host='0.0.0.0')
-    
 if __name__ == "__main__":
-    app.run(debug=False, host="192.168.0.28", port=10017)
+    app.run(debug=False, host="0.0.0.0")
 
