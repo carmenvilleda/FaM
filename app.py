@@ -1,6 +1,7 @@
 from flask import Flask, send_file
 from PIL import Image, ImageDraw
 import numpy as np
+import os
 
 app = Flask(__name__)
 
@@ -34,7 +35,13 @@ def crear_ramo_lirios(cantidad_lirios=5):
 @app.route('/')
 def mostrar_imagen():
     nombre_archivo = crear_ramo_lirios(7)
-    return send_file(nombre_archivo, mimetype='image/png')
+    response = send_file(nombre_archivo, mimetype='image/png')
+    os.remove(nombre_archivo)  # Eliminar el archivo después de enviarlo
+    return response
+
+if __name__ == "__main__":
+    app.run(debug=False, host="0.0.0.0")
+
 
 
 if __name__ == "__main__":
