@@ -1,69 +1,52 @@
 from flask import Flask, send_file
-from PIL import Image, ImageDraw
+import matplotlib.pyplot as plt
 import numpy as np
-import os
 
-app = Flask(__name__)
+app = Flask(_name_)
 
-def crear_ramo_flores(cantidad_flores=45):
-    # Crear una imagen con fondo rosa pálido
-    ancho, alto = 800, 800
-    imagen = Image.new('RGB', (ancho, alto), (255, 192, 203))  # Fondo rosa pálido
-    dibujar = ImageDraw.Draw(imagen)
+def draw_flower():
+    fig, ax = plt.subplots()
 
-    # Colores
-    color_lirio = (255, 255, 102)  # Amarillo suave
-    color_borde = (255, 140, 0)     # Naranja claro
-    color_tallo = (34, 139, 34)     # Verde
-    color_hoja = (0, 128, 0)        # Verde oscuro
+    # Crear el tallo de la flor
+    stem_x = np.linspace(0, 0, 100)
+    stem_y = np.linspace(0, 1, 100)
+    ax.plot(stem_x, stem_y, color='green', lw=2)
 
-    # Espaciado y ángulo para la distribución espiral
-    angulo = np.linspace(0, 6 * np.pi, cantidad_flores)
-    radio = np.linspace(50, 250, cantidad_flores)
+    # Crear pétalos
+    theta = np.linspace(0, 2 * np.pi, 100)
+    for angle in np.linspace(0, 2 * np.pi, 6):
+        petal_x = 0.2 * np.cos(theta) + np.cos(angle)
+        petal_y = 0.2 * np.sin(theta) + np.sin(angle) + 1
+        ax.fill(petal_x, petal_y, color='yellow')
 
-    # Dibujar las flores
-    for i in range(cantidad_flores):
-        # Calcular la posición de cada flor
-        x = 400 + radio[i] * np.cos(angulo[i])
-        y = 400 + radio[i] * np.sin(angulo[i])
+    # Crear el centro de la flor
+    center_x = 0.1 * np.cos(theta)
+    center_y = 0.1 * np.sin(theta) + 1
+    ax.fill(center_x, center_y, color='white')
 
-        # Dibujar pétalos con diferentes formas
-        for angle in range(0, 360, 30):
-            petalo_x = x + 40 * np.cos(np.radians(angle))
-            petalo_y = y + 40 * np.sin(np.radians(angle))
+    # Crear hojas
+    leaf_theta = np.linspace(0, np.pi, 100)
+    leaf_x = 0.2 * np.cos(leaf_theta) - 0.2
+    leaf_y = 0.1 * np.sin(leaf_theta) + 0.5
+    ax.fill(leaf_x, leaf_y, color='blue')
 
-            petalo_ancho = 20 + np.random.randint(-5, 5)
-            petalo_largo = 40 + np.random.randint(-5, 5)
+    leaf_x2 = 0.2 * np.cos(leaf_theta) + 0.2
+    leaf_y2 = 0.1 * np.sin(leaf_theta) + 0.3
+    ax.fill(leaf_x2, leaf_y2, color='blue')
 
-            dibujar.ellipse([petalo_x - petalo_ancho, petalo_y - petalo_largo, petalo_x + petalo_ancho, petalo_y + 5], fill=color_lirio)
-            dibujar.ellipse([petalo_x - petalo_ancho - 2, petalo_y - petalo_largo - 2, petalo_x + petalo_ancho + 2, petalo_y + 7], outline=color_borde, width=2)
+    # Ajustar los límites y ocultar los ejes
+    ax.set_xlim([-1, 1])
+    ax.set_ylim([0, 1.5])
+    ax.axis('off')
 
-        # Solo algunos tallos
-        if i % 2 == 0:  # Cada segunda flor tendrá tallo
-            dibujar.line([x, y + 5, 400, 700], fill=color_tallo, width=8)
-
-        # Dibujar el centro de la flor
-        centro_color = (255, 204, 0)
-        dibujar.ellipse([x - 15, y - 15, x + 15, y + 15], fill=centro_color)
-
-        # Dibujar hojas
-        hoja_ancho = 30
-        hoja_largo = 50
-        hoja_offset = np.random.randint(-10, 10)
-        dibujar.polygon([(x - 25, y + 5), (x - hoja_ancho + hoja_offset, y + hoja_largo), (x, y + 10)], fill=color_hoja)  # Hoja izquierda
-        dibujar.polygon([(x + 25, y + 5), (x + hoja_ancho + hoja_offset, y + hoja_largo), (x, y + 10)], fill=color_hoja)  # Hoja derecha
-
-    # Guardar la imagen en formato PNG
-    imagen.save('ramo_flores.png')
-    return 'ramo_flores.png'
+    # Guardar la imagen temporalmente
+    plt.savefig('/tmp/flower_image.png')
+    plt.close(fig)
 
 @app.route('/')
-def mostrar_imagen():
-    nombre_archivo = crear_ramo_flores(45)
-    response = send_file(nombre_archivo, mimetype='image/png')
-    os.remove(nombre_archivo)
-    return response
+def home():
+    draw_flower()
+    return send_file('/tmp/flower_image.png', mimetype='image/png')
 
-if __name__ == "__main__":
-    app.run(debug=False, host="0.0.0.0")
-
+if _name_ == "_main_":
+    app.run(host='0.0.0.0', port=5000)
