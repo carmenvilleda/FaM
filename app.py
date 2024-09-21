@@ -5,60 +5,60 @@ import os
 
 app = Flask(__name__)
 
-def crear_ramo_lirios(cantidad_lirios=5):
+def crear_ramo_flores(cantidad_flores=7):
     # Crear una imagen en blanco
     ancho, alto = 800, 800
-    imagen = Image.new('RGB', (ancho, alto), (255, 255, 255))
+    imagen = Image.new('RGB', (ancho, alto), (255, 240, 245))  # Fondo rosa pastel
     dibujar = ImageDraw.Draw(imagen)
 
-    # Definir los colores para los lirios amarillos y los tallos
-    color_lirio = (255, 215, 0)  # Amarillo dorado
-    color_tallo = (34, 139, 34)   # Verde
-    color_fondo = (255, 250, 240) # Fondo crema
+    # Colores
+    color_lirio = (255, 223, 186)  # Amarillo suave
+    color_borde = (255, 140, 0)     # Naranja claro
+    color_tallo = (34, 139, 34)     # Verde
+    color_hoja = (144, 238, 144)    # Verde claro
 
-    # Dibujar el fondo
-    dibujar.rectangle([0, 0, ancho, alto], fill=color_fondo)
+    # Posiciones y tamaños para las flores
+    posiciones = np.linspace(350, 450, cantidad_flores)  # Posiciones centradas
+    radio_flores = 40  # Radio de las flores
 
-    # Posiciones y tamaños para los lirios
-    posiciones = np.linspace(300, 500, cantidad_lirios)
-    radio_lirios = 30  # Radio más pequeño para los lirios
-    distancia_tallos = 60  # Distancia entre los tallos
-
-    # Dibujar los lirios y tallos
-    for i, pos in enumerate(posiciones):
-        # Posiciones para los lirios
+    # Dibujar las flores
+    for pos in posiciones:
+        # Posiciones fijas para un ramo
         x = pos
-        y = 300 + (np.random.randint(-10, 10))  # Añadir algo de aleatoriedad en la posición Y
+        y = 300 + np.random.randint(-10, 10)
 
-        # Dibujar un lirio (forma más compleja)
-        dibujar.polygon([(x, y), (x - radio_lirios, y - radio_lirios), (x + radio_lirios, y - radio_lirios)],
-                         fill=color_lirio)
-        dibujar.polygon([(x, y), (x - radio_lirios, y + radio_lirios), (x + radio_lirios, y + radio_lirios)],
-                         fill=color_lirio)
+        # Dibujar pétalos con un borde
+        for angle in range(0, 360, 30):  # Dibujar 12 pétalos
+            petalo_x = x + radio_flores * np.cos(np.radians(angle))
+            petalo_y = y + radio_flores * np.sin(np.radians(angle))
 
-        # Dibujar un tallo verde
-        dibujar.line([x, y, x, 700], fill=color_tallo, width=5)
+            # Pétalo con borde
+            dibujar.ellipse([petalo_x - 20, petalo_y - 40, petalo_x + 20, petalo_y + 5], fill=color_lirio)
+            dibujar.ellipse([petalo_x - 22, petalo_y - 42, petalo_x + 22, petalo_y + 7], outline=color_borde, width=2)
 
-        # Añadir detalles de hojas
-        dibujar.ellipse([x - 15, 400, x + 15, 430], fill=(0, 100, 0))
+        # Dibujar el centro de la flor
+        centro_color = (255, 255, 102)  # Amarillo claro
+        dibujar.ellipse([x - 15, y - 15, x + 15, y + 15], fill=centro_color)  # Centro amarillo claro
+
+        # Dibujar el tallo
+        dibujar.line([x, y + 5, x, 700], fill=color_tallo, width=8)
+
+        # Dibujar hojas
+        hoja_y1 = y + 30  # Hojas cerca de la flor
+        hoja_y2 = hoja_y1 + 30
+        dibujar.ellipse([x - 30, hoja_y1, x + 10, hoja_y2], fill=color_hoja)  # Hoja a la izquierda
+        dibujar.ellipse([x - 10, hoja_y1, x + 30, hoja_y2], fill=color_hoja)  # Hoja a la derecha
 
     # Guardar la imagen en formato PNG
-    imagen.save('lirios_ramo.png')
-    return 'lirios_ramo.png'
+    imagen.save('ramo_flores.png')
+    return 'ramo_flores.png'
 
 @app.route('/')
 def mostrar_imagen():
-    nombre_archivo = crear_ramo_lirios(7)
+    nombre_archivo = crear_ramo_flores(7)
     response = send_file(nombre_archivo, mimetype='image/png')
     os.remove(nombre_archivo)  # Eliminar el archivo después de enviarlo
     return response
 
 if __name__ == "__main__":
     app.run(debug=False, host="0.0.0.0")
-
-
-
-
-if __name__ == "__main__":
-    app.run(debug=False, host="0.0.0.0")
-
