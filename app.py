@@ -5,10 +5,10 @@ import os
 
 app = Flask(__name__)
 
-def crear_ramo_flores(cantidad_flores=20):
-    # Crear una imagen en blanco
+def crear_ramo_flores(cantidad_flores=30):  # Aumentamos la cantidad de flores
+    # Crear una imagen con fondo rosa pálido
     ancho, alto = 800, 800
-    imagen = Image.new('RGB', (ancho, alto), (255, 240, 245))  # Fondo rosa pastel
+    imagen = Image.new('RGB', (ancho, alto), (255, 192, 203))  # Fondo rosa pálido
     dibujar = ImageDraw.Draw(imagen)
 
     # Colores
@@ -18,7 +18,7 @@ def crear_ramo_flores(cantidad_flores=20):
     color_hoja = (0, 128, 0)        # Verde oscuro
 
     # Espaciado y ángulo para la distribución espiral
-    angulo = np.linspace(0, 4 * np.pi, cantidad_flores)  # 4 vueltas
+    angulo = np.linspace(0, 6 * np.pi, cantidad_flores)  # 6 vueltas para más flores
     radio = np.linspace(50, 200, cantidad_flores)  # Crecer hacia afuera
 
     # Dibujar las flores
@@ -55,7 +55,7 @@ def crear_ramo_flores(cantidad_flores=20):
 
 @app.route('/')
 def mostrar_imagen():
-    nombre_archivo = crear_ramo_flores(20)
+    nombre_archivo = crear_ramo_flores(30)  # Ahora con 30 flores
     response = send_file(nombre_archivo, mimetype='image/png')
     os.remove(nombre_archivo)  # Eliminar el archivo después de enviarlo
     return response
