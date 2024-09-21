@@ -48,5 +48,5 @@ def home():
     draw_flower()
     return send_file('/tmp/flower_image.png', mimetype='image/png')
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
