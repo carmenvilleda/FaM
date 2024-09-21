@@ -2,7 +2,7 @@ from flask import Flask, send_file
 import matplotlib.pyplot as plt
 import numpy as np
 
-app = Flask(_name_)
+app = Flask(__name__)
 
 def draw_flower():
     fig, ax = plt.subplots()
